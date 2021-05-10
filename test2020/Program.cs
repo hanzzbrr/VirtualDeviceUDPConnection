@@ -23,22 +23,22 @@ public class Program
 
                 Console.WriteLine($"Received broadcast from {groupEP} :");
                 GCHandle gcHandle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
+                object resultPackage = null;
 
                 switch (bytes.Length)
                 {
-                    case 8:                        
-                        var wardenPackage = (WardenPackage)Marshal.PtrToStructure(gcHandle.AddrOfPinnedObject(), typeof(WardenPackage));
-                        gcHandle.Free();
-                        Console.WriteLine(wardenPackage);
+                    case 8:
+                        resultPackage = (WardenPackage)Marshal.PtrToStructure(gcHandle.AddrOfPinnedObject(), typeof(WardenPackage));
                         break;
                     case 16:
-                        var responsePackage = (WardenPackage)Marshal.PtrToStructure(gcHandle.AddrOfPinnedObject(), typeof(WardenPackage));
-                        gcHandle.Free();
-                        Console.WriteLine(responsePackage);
+                        resultPackage = (WardenPackage)Marshal.PtrToStructure(gcHandle.AddrOfPinnedObject(), typeof(WardenPackage));                                                
                         break;
                     default:
                         break;
                 }
+
+                Console.WriteLine(resultPackage);
+                gcHandle.Free();
             }
         }
         catch (SocketException e)
