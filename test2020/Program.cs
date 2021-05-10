@@ -22,13 +22,23 @@ public class Program
                 byte[] bytes = listener.Receive(ref groupEP);
 
                 Console.WriteLine($"Received broadcast from {groupEP} :");
-
                 GCHandle gcHandle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
-                var data = (IncomingPackage)Marshal.PtrToStructure(gcHandle.AddrOfPinnedObject(), typeof(IncomingPackage));
-                gcHandle.Free();
 
-                Console.WriteLine($"Id: {data.Id} + N1: {data.Num1} + N2: {data.Num2}\n");
-
+                switch (bytes.Length)
+                {
+                    case 8:                        
+                        var wardenPackage = (WardenPackage)Marshal.PtrToStructure(gcHandle.AddrOfPinnedObject(), typeof(WardenPackage));
+                        gcHandle.Free();
+                        Console.WriteLine(wardenPackage);
+                        break;
+                    case 16:
+                        var responsePackage = (WardenPackage)Marshal.PtrToStructure(gcHandle.AddrOfPinnedObject(), typeof(WardenPackage));
+                        gcHandle.Free();
+                        Console.WriteLine(responsePackage);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
         catch (SocketException e)
@@ -48,14 +58,40 @@ public class Program
 }
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
-public class IncomingPackage
+public class WardenPackage
 {
     public int Id { private set; get; }
-    public int Num1 { private set; get; }
-    public int Num2 { private set; get; }
+    public ushort Num1 { private set; get; }
+    public ushort Num2 { private set; get; }
 
-    public IncomingPackage()
+    public WardenPackage()
     {
 
+    }
+
+    public override string ToString()
+    {
+        return $"Id: {Id} + N1: {Num1} + N2: {Num2}";
+    }
+}
+
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public class ResponsePackage
+{
+    public int Id { private set; get; }
+    public string Command { private set; get; }
+    public byte ResponseStatus { private set; get; }
+    public byte UThreshold { private set; get; }
+    public byte BThreshold { private set; get; }
+
+    public ResponsePackage()
+    {
+        
+    }
+
+    public override string ToString()
+    {
+        return $"Id: {Id}, Command: {Command}, ResponseStatus: {ResponseStatus}, UpperThreshold: {UThreshold}" +
+            $"BottomThreshold: {BThreshold}";
     }
 }
