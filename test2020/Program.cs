@@ -4,56 +4,59 @@ using System.Net.Sockets;
 using System.Text;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 public class Program
 {
     private const int listenPort = 62006;
 
-    private static void StartListener()
+    private static async Task StartListener()
     {
-        UdpClient listener = new UdpClient(listenPort);
-        IPEndPoint groupEP = new IPEndPoint(IPAddress.Any, listenPort);
-
-        try
+        using (var listener = new UdpClient(listenPort))
         {
-            while (true)
+            try
             {
-                Console.WriteLine("Waiting for broadcast");
-                byte[] bytes = listener.Receive(ref groupEP);
-
-                Console.WriteLine($"Received broadcast from {groupEP} :");
-                GCHandle gcHandle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
-                object resultPackage = null;
-
-                switch (bytes.Length)
+                while (true)
                 {
-                    case 8:
-                        resultPackage = (WardenPackage)Marshal.PtrToStructure(gcHandle.AddrOfPinnedObject(), typeof(WardenPackage));
-                        break;
-                    case 16:
-                        resultPackage = (WardenPackage)Marshal.PtrToStructure(gcHandle.AddrOfPinnedObject(), typeof(WardenPackage));                                                
-                        break;
-                    default:
-                        break;
-                }
+                    Console.WriteLine("Waiting for broadcast");
+                    byte[] bytes = (await listener.ReceiveAsync()).Buffer;
+                    GCHandle gcHandle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
+                    object resultPackage = null;
 
-                Console.WriteLine(resultPackage);
-                gcHandle.Free();
+                    switch (bytes.Length)
+                    {
+                        case 8:
+                            resultPackage = (WardenPackage)Marshal.PtrToStructure(gcHandle.AddrOfPinnedObject(), typeof(WardenPackage));
+                            break;
+                        case 16:
+                            resultPackage = (WardenPackage)Marshal.PtrToStructure(gcHandle.AddrOfPinnedObject(), typeof(WardenPackage));
+                            break;
+                        default:
+                            break;
+                    }
+
+                    Console.WriteLine(resultPackage);
+                    gcHandle.Free();
+                }
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine(e);
+            }
+            finally
+            {
+                listener.Close();
             }
         }
-        catch (SocketException e)
-        {
-            Console.WriteLine(e);
-        }
-        finally
-        {
-            listener.Close();
-        }
+        
     }
 
     public static void Main()
     {
-        StartListener();
+        var task = StartListener();
+        while (Console.ReadKey().Key != ConsoleKey.X)
+        {
+        }
     }
 }
 
@@ -71,7 +74,7 @@ public class WardenPackage
 
     public override string ToString()
     {
-        return $"Id: {Id} + N1: {Num1} + N2: {Num2}";
+        return $"Id: {Id} N1: {Num1} N2: {Num2}";
     }
 }
 
