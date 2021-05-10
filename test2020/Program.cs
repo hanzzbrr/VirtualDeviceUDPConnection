@@ -52,12 +52,36 @@ public class Program
         
     }
 
+    private static void CreateRequest()
+    {
+        using(var udpClient = new UdpClient(sendPort))
+        {
+            Byte[] sendBytes = Encoding.ASCII.GetBytes("Is anybody there");
+            try
+            {
+                udpClient.Send(sendBytes, sendBytes.Length);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+        }
+    }
+
     public static void Main()
     {
         var task = StartListener();
-        while (Console.ReadKey().Key != ConsoleKey.X)
+        ConsoleKey consoleKey;
+
+        do
         {
-        }
+            consoleKey = Console.ReadKey().Key;
+            if(consoleKey == ConsoleKey.R)
+            {
+                Console.WriteLine("creating request");
+            }
+
+        } while (consoleKey != ConsoleKey.X);
     }
 }
 
