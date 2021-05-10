@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 public class Program
 {
     private const int listenPort = 62006;
+    private const int sendPort = 62005;
 
     private static async Task StartListener()
     {
@@ -79,7 +80,7 @@ public class WardenPackage
 }
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
-public class ResponsePackage
+public class Response
 {
     public int Id { private set; get; }
     public string Command { private set; get; }
@@ -87,7 +88,7 @@ public class ResponsePackage
     public byte UThreshold { private set; get; }
     public byte BThreshold { private set; get; }
 
-    public ResponsePackage()
+    public Response()
     {
         
     }
@@ -96,5 +97,34 @@ public class ResponsePackage
     {
         return $"Id: {Id}, Command: {Command}, ResponseStatus: {ResponseStatus}, UpperThreshold: {UThreshold}" +
             $"BottomThreshold: {BThreshold}";
+    }
+}
+
+
+public class ReadRequest
+{
+    public int Id { set; get; }
+    public string Command { set; get; }
+    
+    public ReadRequest(int id)
+    {
+        id = Id;
+        Command = "LR";
+    }
+}
+
+public class WriteRequest
+{
+    public int Id { set; get; }
+    public string Command { set; get; }
+    public byte UThreshold { private set; get; }
+    public byte BThreshold { private set; get; }
+
+    public WriteRequest(int id, byte upperThreshold, byte bottomThreshold)
+    {
+        Id = id;
+        Command = "LW";
+        UThreshold = upperThreshold;
+        BThreshold = bottomThreshold;
     }
 }
