@@ -2,10 +2,9 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.IO;
+using System.Text.RegularExpressions;
 
 public class Program
 {
@@ -21,7 +20,6 @@ public class Program
             {
                 while (true)
                 {
-                    Console.WriteLine("Waiting for broadcast");
                     byte[] bytes = (await listener.ReceiveAsync()).Buffer;
                     object resultPackage = null;
 
@@ -36,7 +34,7 @@ public class Program
                         default:
                             break;
                     }
-                    Console.WriteLine($"len: {bytes.Length}, {resultPackage}");
+                    Console.WriteLine($"Incoming Package: {resultPackage}");
                 }
             }
             catch (SocketException e)
@@ -55,40 +53,41 @@ public class Program
     {
         var task = StartListener();
         ConsoleKey consoleKey;
-
         do
         {
             consoleKey = Console.ReadKey().Key;
-            if(consoleKey == ConsoleKey.R)
-            {
-                Console.WriteLine("creating request");
-                using(var client = new UdpClient())
-                {
-                    var endPoint = new IPEndPoint(IPAddress.Loopback, sendPort);
-                    try
-                    {
-                        var readRequest = new ReadRequest(1);
-                        byte[] sendBytes = readRequest.ToArray();
+            //if(consoleKey == ConsoleKey.R)
+            //{
+            //    Console.WriteLine("creating request");
+            //    using(var client = new UdpClient())
+            //    {
+            //        var endPoint = new IPEndPoint(IPAddress.Loopback, sendPort);
+            //        try
+            //        {
+            //            var readRequest = new ReadRequest(1);
+            //            byte[] sendBytes = readRequest.ToArray();
 
-                        client.Connect(endPoint);
-                        client.Send(sendBytes, sendBytes.Length);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.ToString());
-                    }
-                }
-            }
-            else if(consoleKey == ConsoleKey.W)
+            //            client.Connect(endPoint);
+            //            client.Send(sendBytes, sendBytes.Length);
+            //        }
+            //        catch (Exception e)
+            //        {
+            //            Console.WriteLine(e.ToString());
+            //        }
+            //    }
+            //}
+            if(consoleKey == ConsoleKey.W)
             {
                 Console.WriteLine("creating request");
+
                 using (var client = new UdpClient())
                 {
                     var endPoint = new IPEndPoint(IPAddress.Loopback, sendPort);
                     try
                     {
-                        var readRequest = new WriteRequest(1,255,0);
-                        byte[] sendBytes = readRequest.ToArray();
+                        WriteRequest writeRequest;
+                        WriteRequestInputLoop(out writeRequest);
+                        byte[] sendBytes = writeRequest.ToArray();
 
                         client.Connect(endPoint);
                         client.Send(sendBytes, sendBytes.Length);
@@ -101,6 +100,20 @@ public class Program
             }
 
         } while (consoleKey != ConsoleKey.X);
+    }
+
+    private static void WriteRequestInputLoop(out WriteRequest wr)
+    {        
+        var rg = new Regex(@"()([1-9]|[1-5]?[0-9]{2,4}|6[1-4][0-9]{3}|65[1-4][0-9]{2}|655[1-2][0-9]|6553[1-5]) \b(1?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\b \b(1?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\b");
+        string input = "";
+        BufferedStream stream;
+        do
+        {
+            Console.WriteLine("Enter request parameteres");
+            input = Console.ReadLine();
+        } while (!rg.IsMatch(input));
+        
+        wr = new WriteRequest(input.Split(' '));
     }
 }
 
@@ -202,6 +215,14 @@ public class WriteRequest
     public string Command { set; get; }
     public ushort UThreshold { private set; get; }
     public ushort BThreshold { private set; get; }
+
+    public WriteRequest(string[] args)
+    {
+        Id = Int32.Parse(args[0]);
+        Command = "LW";
+        UThreshold =  UInt16.Parse(args[1]);
+        BThreshold = UInt16.Parse(args[2]);
+    }
 
     public WriteRequest(int id, ushort upperThreshold, ushort bottomThreshold)
     {
