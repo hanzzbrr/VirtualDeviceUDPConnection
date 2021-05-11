@@ -5,6 +5,7 @@ using System.Text;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using System.IO;
 
 public class Program
 {
@@ -27,7 +28,8 @@ public class Program
                     switch (bytes.Length)
                     {
                         case 8:
-                            resultPackage = (WardenPackage)Marshal.PtrToStructure(gcHandle.AddrOfPinnedObject(), typeof(WardenPackage));
+                            //resultPackage = (WardenPackage)Marshal.PtrToStructure(gcHandle.AddrOfPinnedObject(), typeof(WardenPackage));
+                            resultPackage = WardenPackage.FromArray(bytes);
                             break;
                         case 16:
                             resultPackage = (WardenPackage)Marshal.PtrToStructure(gcHandle.AddrOfPinnedObject(), typeof(WardenPackage));
@@ -85,7 +87,8 @@ public class Program
     }
 }
 
-[StructLayout(LayoutKind.Sequential, Pack = 1)]
+//[StructLayout(LayoutKind.Sequential, Pack = 1)]
+[System.Serializable]
 public class WardenPackage
 {
     public int Id { private set; get; }
@@ -95,6 +98,19 @@ public class WardenPackage
     public WardenPackage()
     {
 
+    }
+
+    public static WardenPackage FromArray(byte[] bytes)
+    {
+        var reader = new BinaryReader(new MemoryStream(bytes));
+
+        var wardenPackage = new WardenPackage();
+
+        wardenPackage.Id = reader.ReadInt32();
+        wardenPackage.Num1 = reader.ReadUInt16();
+        wardenPackage.Num2 = reader.ReadUInt16();
+
+        return wardenPackage;
     }
 
     public override string ToString()
