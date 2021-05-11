@@ -78,7 +78,8 @@ public class Program
                         Console.WriteLine(e.ToString());
                     }
                 }
-            }else if(consoleKey == ConsoleKey.W)
+            }
+            else if(consoleKey == ConsoleKey.W)
             {
                 Console.WriteLine("creating request");
                 using (var client = new UdpClient())
@@ -86,7 +87,7 @@ public class Program
                     var endPoint = new IPEndPoint(IPAddress.Loopback, sendPort);
                     try
                     {
-                        var readRequest = new WriteRequest(1,180,35);
+                        var readRequest = new WriteRequest(1,255,0);
                         byte[] sendBytes = readRequest.ToArray();
 
                         client.Connect(endPoint);
@@ -202,7 +203,7 @@ public class WriteRequest
     public ushort UThreshold { private set; get; }
     public ushort BThreshold { private set; get; }
 
-    public WriteRequest(int id, byte upperThreshold, byte bottomThreshold)
+    public WriteRequest(int id, ushort upperThreshold, ushort bottomThreshold)
     {
         Id = id;
         Command = "LW";
