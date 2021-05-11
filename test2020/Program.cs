@@ -1,18 +1,26 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
-using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 public class Program
 {
+    private const int _deviceLifetime = 30;
+
     private const int listenPort = 62006;
     private const int sendPort = 62005;
 
+    private static bool _isInputMode;
+
+    private static Dictionary<int, Device> _devices = new Dictionary<int, Device>();
+
     private static async Task StartListener()
     {
+        _isInputMode = false;
         IPEndPoint ep = new IPEndPoint(IPAddress.Any, listenPort);
         using (var listener = new UdpClient(ep))
         {
@@ -21,20 +29,32 @@ public class Program
                 while (true)
                 {
                     byte[] bytes = (await listener.ReceiveAsync()).Buffer;
-                    object resultPackage = null;
-
                     switch (bytes.Length)
                     {
                         case 8:
-                            resultPackage = WardenPackage.FromArray(bytes);
+                            WardenPackage wardenPackage = WardenPackage.FromArray(bytes);
+                            if (!_devices.ContainsKey(wardenPackage.Id))
+                            {
+                                _devices.Add(wardenPackage.Id, new Device() { Value1 = wardenPackage.Value1, Value2 = wardenPackage.Value2 });
+                                var readRequestTask = SendReadRequest(wardenPackage.Id);
+                            }
+                            else
+                            {
+                                _devices[wardenPackage.Id].Value1 = wardenPackage.Value1;
+                                _devices[wardenPackage.Id].Value2 = wardenPackage.Value2;
+                            }
                             break;
                         case 12:
-                            resultPackage = Response.FromArray(bytes);
+                            Response response = Response.FromArray(bytes);
+                            if(_devices.ContainsKey(response.Id))
+                            {
+                                _devices[response.Id].BThreshold = response.BThreshold;
+                                _devices[response.Id].UThreshold = response.UThreshold;
+                            }
                             break;
                         default:
                             break;
-                    }
-                    Console.WriteLine($"Incoming Package: {resultPackage}");
+                    }                  
                 }
             }
             catch (SocketException e)
@@ -49,35 +69,51 @@ public class Program
         
     }
 
+    private static async Task SendReadRequest(int id)
+    {
+        using (var client = new UdpClient())
+        {
+            var endPoint = new IPEndPoint(IPAddress.Loopback, sendPort);
+            try
+            {
+                var readRequest = new ReadRequest(id);
+                byte[] sendBytes = readRequest.ToArray();
+
+                client.Connect(endPoint);
+                await client.SendAsync(sendBytes, sendBytes.Length);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+        }
+    }
+    
+    private static async Task OutputDevicesState()
+    {
+        while(true)
+        {
+            await Task.Delay(1000);
+            foreach (var d in _devices)
+            {
+                Console.WriteLine($"id: {d.Key}, " + d.Value);
+            }
+            Console.WriteLine();
+        }
+    }
+
+
     public static void Main()
     {
-        var task = StartListener();
+        var listenerTask = StartListener();
+        var outStateTask = OutputDevicesState();
         ConsoleKey consoleKey;
         do
         {
             consoleKey = Console.ReadKey().Key;
-            //if(consoleKey == ConsoleKey.R)
-            //{
-            //    Console.WriteLine("creating request");
-            //    using(var client = new UdpClient())
-            //    {
-            //        var endPoint = new IPEndPoint(IPAddress.Loopback, sendPort);
-            //        try
-            //        {
-            //            var readRequest = new ReadRequest(1);
-            //            byte[] sendBytes = readRequest.ToArray();
-
-            //            client.Connect(endPoint);
-            //            client.Send(sendBytes, sendBytes.Length);
-            //        }
-            //        catch (Exception e)
-            //        {
-            //            Console.WriteLine(e.ToString());
-            //        }
-            //    }
-            //}
             if(consoleKey == ConsoleKey.W)
             {
+                _isInputMode = true;
                 Console.WriteLine("creating request");
 
                 using (var client = new UdpClient())
@@ -97,6 +133,7 @@ public class Program
                         Console.WriteLine(e.ToString());
                     }
                 }
+                _isInputMode = false;
             }
 
         } while (consoleKey != ConsoleKey.X);
@@ -117,12 +154,28 @@ public class Program
     }
 }
 
+
+public class Device
+{
+    public ushort Value1 { set; get; }
+    public ushort Value2 { set; get; }
+    public ushort UThreshold { set; get; }
+    public ushort BThreshold { set; get; }
+
+    public Device() { }
+
+    public override string ToString()
+    {
+        return $"Value1: {Value1}, Value2: {Value2}, UThreshold: {UThreshold}, BThreshold {BThreshold}";
+    }
+}
+
 [System.Serializable]
 public class WardenPackage
 {
     public int Id { private set; get; }
-    public ushort Num1 { private set; get; }
-    public ushort Num2 { private set; get; }
+    public ushort Value1 { private set; get; }
+    public ushort Value2 { private set; get; }
 
     public WardenPackage()
     {
@@ -136,15 +189,15 @@ public class WardenPackage
         var wardenPackage = new WardenPackage();
 
         wardenPackage.Id = reader.ReadInt32();
-        wardenPackage.Num1 = reader.ReadUInt16();
-        wardenPackage.Num2 = reader.ReadUInt16();
+        wardenPackage.Value1 = reader.ReadUInt16();
+        wardenPackage.Value2 = reader.ReadUInt16();
 
         return wardenPackage;
     }
 
     public override string ToString()
     {
-        return $"Id: {Id} N1: {Num1} N2: {Num2}";
+        return $"Id: {Id} Value1: {Value1} N2: {Value2}";
     }
 }
 
