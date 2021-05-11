@@ -86,7 +86,7 @@ public class Program
                     var endPoint = new IPEndPoint(IPAddress.Loopback, sendPort);
                     try
                     {
-                        var readRequest = new WriteRequest(1);
+                        var readRequest = new WriteRequest(1,180,35);
                         byte[] sendBytes = readRequest.ToArray();
 
                         client.Connect(endPoint);
@@ -139,9 +139,9 @@ public class Response
 {
     public int Id { private set; get; }
     public string Command { private set; get; }
-    public byte ResponseStatus { private set; get; }
-    public byte UThreshold { private set; get; }
-    public byte BThreshold { private set; get; }
+    public ushort ResponseStatus { private set; get; }
+    public ushort UThreshold { private set; get; }
+    public ushort BThreshold { private set; get; }
 
     public Response()
     {
@@ -156,9 +156,9 @@ public class Response
 
         response.Id = reader.ReadInt32();
         response.Command = Encoding.ASCII.GetString(reader.ReadBytes(2));
-        response.ResponseStatus = reader.ReadByte();
-        response.UThreshold = reader.ReadByte();
-        response.BThreshold = reader.ReadByte();
+        response.ResponseStatus = reader.ReadUInt16();
+        response.UThreshold = reader.ReadUInt16();
+        response.BThreshold = reader.ReadUInt16();
 
         return response;
     }
@@ -199,8 +199,8 @@ public class WriteRequest
 {
     public int Id { set; get; }
     public string Command { set; get; }
-    public byte UThreshold { private set; get; }
-    public byte BThreshold { private set; get; }
+    public ushort UThreshold { private set; get; }
+    public ushort BThreshold { private set; get; }
 
     public WriteRequest(int id, byte upperThreshold, byte bottomThreshold)
     {
@@ -216,7 +216,7 @@ public class WriteRequest
         var writer = new BinaryWriter(stream);
 
 
-        writer.Write(this.Id);
+        writer.Write(Id);
         writer.Write(Encoding.ASCII.GetBytes(Command));
         writer.Write(UThreshold);
         writer.Write(BThreshold);
