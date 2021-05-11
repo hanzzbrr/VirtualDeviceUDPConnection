@@ -32,7 +32,7 @@ public class Program
                             resultPackage = WardenPackage.FromArray(bytes);
                             break;
                         case 16:
-                            resultPackage = (WardenPackage)Marshal.PtrToStructure(gcHandle.AddrOfPinnedObject(), typeof(WardenPackage));
+                            resultPackage = WardenPackage.FromArray(bytes);
                             break;
                         default:
                             break;
@@ -87,7 +87,6 @@ public class Program
     }
 }
 
-//[StructLayout(LayoutKind.Sequential, Pack = 1)]
 [System.Serializable]
 public class WardenPackage
 {
@@ -119,7 +118,7 @@ public class WardenPackage
     }
 }
 
-[StructLayout(LayoutKind.Sequential, Pack = 1)]
+[System.Serializable]
 public class Response
 {
     public int Id { private set; get; }
@@ -131,6 +130,21 @@ public class Response
     public Response()
     {
         
+    }
+
+    public static Response FromArray(byte[] bytes)
+    {
+        var reader = new BinaryReader(new MemoryStream(bytes));
+
+        var response = new Response();
+
+        response.Id = reader.ReadInt32();
+        response.Command = reader.ReadString();
+        response.ResponseStatus = reader.ReadByte();
+        response.UThreshold = reader.ReadByte();
+        response.BThreshold = reader.ReadByte();
+
+        return response;
     }
 
     public override string ToString()
