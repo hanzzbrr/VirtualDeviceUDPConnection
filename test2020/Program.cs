@@ -14,13 +14,13 @@ public class Program
     private const int listenPort = 62006;
     private const int sendPort = 62005;
 
-    private static bool _isInputMode;
+    private static bool _lockOutput;
 
     private static Dictionary<int, Device> _devices = new Dictionary<int, Device>();
 
     private static async Task StartListener()
     {
-        _isInputMode = false;
+        _lockOutput = false;
         IPEndPoint ep = new IPEndPoint(IPAddress.Any, listenPort);
         using (var listener = new UdpClient(ep))
         {
@@ -94,9 +94,17 @@ public class Program
         while(true)
         {
             await Task.Delay(1000);
+            if(_lockOutput)
+            {
+                continue;
+            }
             foreach (var d in _devices)
             {
-                Console.WriteLine($"id: {d.Key}, " + d.Value);
+                Console.Write($"id: {d.Key}, Value1: {d.Value.Value1}, ");
+                Console.ForegroundColor = d.Value.IsWithinLimits ? ConsoleColor.White : ConsoleColor.Red;
+                Console.Write($"Value2: {d.Value.Value2}, ");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"UpperLimit: {d.Value.UThreshold}, BottomLimit: {d.Value.BThreshold}");
             }
             Console.WriteLine();
         }
@@ -113,7 +121,7 @@ public class Program
             consoleKey = Console.ReadKey().Key;
             if(consoleKey == ConsoleKey.W)
             {
-                _isInputMode = true;
+                _lockOutput = true;
                 Console.WriteLine("creating request");
 
                 using (var client = new UdpClient())
@@ -133,7 +141,7 @@ public class Program
                         Console.WriteLine(e.ToString());
                     }
                 }
-                _isInputMode = false;
+                _lockOutput = false;
             }
 
         } while (consoleKey != ConsoleKey.X);
@@ -161,6 +169,8 @@ public class Device
     public ushort Value2 { set; get; }
     public ushort UThreshold { set; get; }
     public ushort BThreshold { set; get; }
+
+    public bool IsWithinLimits => (Value2 <= UThreshold && Value2 >= BThreshold);
 
     public Device() { }
 
