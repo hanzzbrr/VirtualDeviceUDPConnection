@@ -14,7 +14,8 @@ public class Program
 
     private static async Task StartListener()
     {
-        using (var listener = new UdpClient(listenPort))
+        IPEndPoint ep = new IPEndPoint(IPAddress.Any, listenPort);
+        using (var listener = new UdpClient(ep))
         {
             try
             {
@@ -22,24 +23,20 @@ public class Program
                 {
                     Console.WriteLine("Waiting for broadcast");
                     byte[] bytes = (await listener.ReceiveAsync()).Buffer;
-                    GCHandle gcHandle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
                     object resultPackage = null;
 
                     switch (bytes.Length)
                     {
                         case 8:
-                            //resultPackage = (WardenPackage)Marshal.PtrToStructure(gcHandle.AddrOfPinnedObject(), typeof(WardenPackage));
                             resultPackage = WardenPackage.FromArray(bytes);
                             break;
-                        case 16:
-                            resultPackage = WardenPackage.FromArray(bytes);
+                        case 12:
+                            resultPackage = Response.FromArray(bytes);
                             break;
                         default:
                             break;
                     }
-
-                    Console.WriteLine(resultPackage);
-                    gcHandle.Free();
+                    Console.WriteLine($"len: {bytes.Length}, {resultPackage}");
                 }
             }
             catch (SocketException e)
@@ -54,22 +51,6 @@ public class Program
         
     }
 
-    private static void CreateRequest()
-    {
-        using(var udpClient = new UdpClient(sendPort))
-        {
-            Byte[] sendBytes = Encoding.ASCII.GetBytes("Is anybody there");
-            try
-            {
-                udpClient.Send(sendBytes, sendBytes.Length);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-        }
-    }
-
     public static void Main()
     {
         var task = StartListener();
@@ -81,6 +62,41 @@ public class Program
             if(consoleKey == ConsoleKey.R)
             {
                 Console.WriteLine("creating request");
+                using(var client = new UdpClient())
+                {
+                    var endPoint = new IPEndPoint(IPAddress.Loopback, sendPort);
+                    try
+                    {
+                        var readRequest = new ReadRequest(1);
+                        byte[] sendBytes = readRequest.ToArray();
+
+                        client.Connect(endPoint);
+                        client.Send(sendBytes, sendBytes.Length);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.ToString());
+                    }
+                }
+            }else if(consoleKey == ConsoleKey.W)
+            {
+                Console.WriteLine("creating request");
+                using (var client = new UdpClient())
+                {
+                    var endPoint = new IPEndPoint(IPAddress.Loopback, sendPort);
+                    try
+                    {
+                        var readRequest = new WriteRequest(1);
+                        byte[] sendBytes = readRequest.ToArray();
+
+                        client.Connect(endPoint);
+                        client.Send(sendBytes, sendBytes.Length);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.ToString());
+                    }
+                }
             }
 
         } while (consoleKey != ConsoleKey.X);
@@ -139,7 +155,7 @@ public class Response
         var response = new Response();
 
         response.Id = reader.ReadInt32();
-        response.Command = reader.ReadString();
+        response.Command = Encoding.ASCII.GetString(reader.ReadBytes(2));
         response.ResponseStatus = reader.ReadByte();
         response.UThreshold = reader.ReadByte();
         response.BThreshold = reader.ReadByte();
@@ -154,7 +170,7 @@ public class Response
     }
 }
 
-
+[System.Serializable]
 public class ReadRequest
 {
     public int Id { set; get; }
@@ -162,8 +178,20 @@ public class ReadRequest
     
     public ReadRequest(int id)
     {
-        id = Id;
+        Id = id;
         Command = "LR";
+    }
+
+    public byte[] ToArray()
+    {
+        var stream = new MemoryStream();
+        var writer = new BinaryWriter(stream);
+
+
+        writer.Write(this.Id);
+        writer.Write(Encoding.ASCII.GetBytes(Command));
+
+        return stream.ToArray();
     }
 }
 
@@ -180,5 +208,19 @@ public class WriteRequest
         Command = "LW";
         UThreshold = upperThreshold;
         BThreshold = bottomThreshold;
+    }
+
+    public byte[] ToArray()
+    {
+        var stream = new MemoryStream();
+        var writer = new BinaryWriter(stream);
+
+
+        writer.Write(this.Id);
+        writer.Write(Encoding.ASCII.GetBytes(Command));
+        writer.Write(UThreshold);
+        writer.Write(BThreshold);
+
+        return stream.ToArray();
     }
 }
