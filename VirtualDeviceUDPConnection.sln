@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test2020", "test2020\test2020.csproj", "{BD0A8E19-7112-456E-8559-2827C1887995}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtualDeviceUDP", "test2020\VirtualDeviceUDP.csproj", "{BD0A8E19-7112-456E-8559-2827C1887995}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtualDeviceUDPWeb", "VirtualDeviceUDPWeb\VirtualDeviceUDPWeb.csproj", "{F23FF04C-321A-43EB-BCA3-413EA3626C70}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{BD0A8E19-7112-456E-8559-2827C1887995}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD0A8E19-7112-456E-8559-2827C1887995}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD0A8E19-7112-456E-8559-2827C1887995}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F23FF04C-321A-43EB-BCA3-413EA3626C70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F23FF04C-321A-43EB-BCA3-413EA3626C70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F23FF04C-321A-43EB-BCA3-413EA3626C70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F23FF04C-321A-43EB-BCA3-413EA3626C70}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
