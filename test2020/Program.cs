@@ -11,7 +11,11 @@ namespace VirtualDeviceUDP
 
     public class Program
     {
-        private const int _deviceLifetime = 30;
+        private const int _wardenPackageSize = 8;
+        private const int _responsePackageSize = 12;
+        private const int _refresDelayMs = 3000;
+
+        private const int _deviceLifetime = 30; //TODO: remove dead devices from _devices dict
 
         private const int listenPort = 62006;
         private const int sendPort = 62005;
@@ -22,8 +26,10 @@ namespace VirtualDeviceUDP
 
         public static void Main()
         {
-            _ = StartListener();
-            _ = OutputDevicesState();
+            _lockOutput = false;
+            _ = ListenToIncomingPackagesAsync();
+            _ = OutDeviteStateAsync();
+
             ConsoleKey consoleKey;
             do
             {
@@ -31,34 +37,37 @@ namespace VirtualDeviceUDP
                 if (consoleKey == ConsoleKey.W)
                 {
                     _lockOutput = true;
-                    Console.WriteLine("creating request");
-
-                    using (var client = new UdpClient())
-                    {
-                        var endPoint = new IPEndPoint(IPAddress.Loopback, sendPort);
-                        try
-                        {
-                            WriteRequest writeRequest;
-                            WriteRequestInputLoop(out writeRequest);
-                            byte[] sendBytes = writeRequest.ToArray();
-
-                            client.Connect(endPoint);
-                            client.Send(sendBytes, sendBytes.Length);
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e.ToString());
-                        }
-                    }
+                    _ = CreateWriteRequestAsync();
                     _lockOutput = false;
                 }
 
             } while (consoleKey != ConsoleKey.X);
         }
 
-        private static async Task StartListener()
+        private static async Task CreateWriteRequestAsync()
         {
-            _lockOutput = false;
+            Console.WriteLine("creating request");
+            using (var client = new UdpClient())
+            {
+                var endPoint = new IPEndPoint(IPAddress.Loopback, sendPort);
+                try
+                {
+                    WriteRequest writeRequest;
+                    WriteRequestInputLoop(out writeRequest);
+                    byte[] sendBytes = writeRequest.ToArray();
+
+                    client.Connect(endPoint);
+                    await client.SendAsync(sendBytes, sendBytes.Length);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
+            }
+        }
+
+        private static async Task ListenToIncomingPackagesAsync()
+        {
             IPEndPoint ep = new IPEndPoint(IPAddress.Any, listenPort);
             using (var listener = new UdpClient(ep))
             {
@@ -69,12 +78,16 @@ namespace VirtualDeviceUDP
                         byte[] bytes = (await listener.ReceiveAsync()).Buffer;
                         switch (bytes.Length)
                         {
-                            case 8:
+                            case _wardenPackageSize:
                                 WardenPackage wardenPackage = WardenPackage.FromArray(bytes);
                                 if (!_devices.ContainsKey(wardenPackage.Id))
                                 {
-                                    _devices.Add(wardenPackage.Id, new Device() { Value1 = wardenPackage.Value1, Value2 = wardenPackage.Value2 });
-                                    var readRequestTask = SendReadRequest(wardenPackage.Id);
+                                    _devices.Add(wardenPackage.Id, new Device() 
+                                    { 
+                                        Value1 = wardenPackage.Value1,
+                                        Value2 = wardenPackage.Value2 
+                                    });
+                                    _ = SendReadRequestAsync(wardenPackage.Id);
                                 }
                                 else
                                 {
@@ -82,7 +95,7 @@ namespace VirtualDeviceUDP
                                     _devices[wardenPackage.Id].Value2 = wardenPackage.Value2;
                                 }
                                 break;
-                            case 12:
+                            case _responsePackageSize:
                                 Response response = Response.FromArray(bytes);
                                 if (_devices.ContainsKey(response.Id))
                                 {
@@ -107,7 +120,7 @@ namespace VirtualDeviceUDP
 
         }
 
-        private static async Task SendReadRequest(int id)
+        private static async Task SendReadRequestAsync(int id)
         {
             using (var client = new UdpClient())
             {
@@ -127,11 +140,11 @@ namespace VirtualDeviceUDP
             }
         }
 
-        private static async Task OutputDevicesState()
+        private static async Task OutDeviteStateAsync()
         {
             while (true)
             {
-                await Task.Delay(1000);
+                await Task.Delay(_refresDelayMs);
                 if (_lockOutput)
                 {
                     continue;
@@ -154,7 +167,7 @@ namespace VirtualDeviceUDP
             string input = "";
             do
             {
-                Console.WriteLine("Enter request parameteres");
+                Console.WriteLine("Enter request parameteres in format: <Id> <UpperLimit> <BottomLimit>, Example: 1 225 25");
                 input = Console.ReadLine();
             } while (!rg.IsMatch(input));
 
