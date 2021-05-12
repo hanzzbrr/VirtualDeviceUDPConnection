@@ -1,6 +1,6 @@
 ﻿namespace VirtualDeviceUDPAPI
 {
-    public class Device : IDevice
+    public class Device
     {
         public ushort Value1 { set; get; }
         public ushort Value2 { set; get; }
@@ -15,13 +15,5 @@
         {
             return $"Value1: {Value1}, Value2: {Value2}, UpLimit: {UpLimit}, LowLimit: {LowLimit}";
         }
-    }
-
-    public interface IDevice
-    {
-        ushort Value1 { set; get; }
-        ushort Value2 { set; get; }
-        ushort UpLimit { set; get; }
-        ushort LowLimit { set; get; }
     }
 }

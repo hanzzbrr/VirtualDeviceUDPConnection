@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using VirtualDeviceUDPAPI;
+using VirtualDeviceUDPWeb;
 
 namespace VirtualDeviceUDPWeb.Models
 {
-    public class DeviceModel : IDevice
+    public class DeviceModel
     {
-        private Device _device;
-
         public ushort Value1 { get; set; }
         public ushort Value2 { get; set; }
         public ushort UpLimit { get; set; }

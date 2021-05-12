@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using VirtualDeviceUDPAPI.Packages_;
+using VirtualDeviceUDPWeb.Packages_;
+using VirtualDeviceUDPWeb.Models;
 
-namespace VirtualDeviceUDPAPI
+namespace VirtualDeviceUDPWeb
 {
     public class UdpNetworkManager
     {
@@ -17,9 +18,9 @@ namespace VirtualDeviceUDPAPI
         private const int listenPort = 62006;
         private const int sendPort = 62005;
 
-        private Dictionary<int, Device> _devices = new Dictionary<int, Device>();
+        private Dictionary<int, DeviceModel> _devices = new Dictionary<int, DeviceModel>();
 
-        public Dictionary<int, Device> Devices => _devices;
+        public Dictionary<int, DeviceModel> Devices => _devices;
 
         public UdpNetworkManager()
         {
@@ -47,7 +48,7 @@ namespace VirtualDeviceUDPAPI
                                 WardenPackage wardenPackage = WardenPackage.FromArray(bytes);
                                 if (!_devices.ContainsKey(wardenPackage.Id))
                                 {
-                                    _devices.Add(wardenPackage.Id, new Device()
+                                    _devices.Add(wardenPackage.Id, new DeviceModel()
                                     {
                                         Value1 = wardenPackage.Value1,
                                         Value2 = wardenPackage.Value2
