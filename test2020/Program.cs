@@ -48,10 +48,10 @@ namespace VirtualDeviceUDP
                 foreach (var d in _udpManager.Devices)
                 {
                     Console.Write($"id: {d.Key}, Value1: {d.Value.Value1}, ");
-                    Console.ForegroundColor = d.Value.IsWithinLimits ? ConsoleColor.White : ConsoleColor.Red;
+                    Console.ForegroundColor = ((Device)d.Value).IsWithinLimits ? ConsoleColor.White : ConsoleColor.Red;
                     Console.Write($"Value2: {d.Value.Value2}, ");
                     Console.ForegroundColor = ConsoleColor.White;
-                    Console.WriteLine($"UpperLimit: {d.Value.UThreshold}, BottomLimit: {d.Value.BThreshold}");
+                    Console.WriteLine($"UpperLimit: {d.Value.UpLimit}, BottomLimit: {d.Value.LowLimit}");
                 }
                 Console.WriteLine();
             }

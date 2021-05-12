@@ -17,9 +17,9 @@ namespace VirtualDeviceUDPAPI
         private const int listenPort = 62006;
         private const int sendPort = 62005;
 
-        private Dictionary<int, Device> _devices = new Dictionary<int, Device>();
+        private Dictionary<int, IDevice> _devices = new Dictionary<int, IDevice>();
 
-        public Dictionary<int, Device> Devices => _devices;
+        public Dictionary<int, IDevice> Devices => _devices;
 
         public UdpNetworkManager()
         {
@@ -64,8 +64,8 @@ namespace VirtualDeviceUDPAPI
                                 Response response = Response.FromArray(bytes);
                                 if (_devices.ContainsKey(response.Id))
                                 {
-                                    _devices[response.Id].BThreshold = response.BThreshold;
-                                    _devices[response.Id].UThreshold = response.UThreshold;
+                                    _devices[response.Id].LowLimit = response.LowLimit;
+                                    _devices[response.Id].UpLimit = response.UpLimit;
                                 }
                                 break;
                             default:

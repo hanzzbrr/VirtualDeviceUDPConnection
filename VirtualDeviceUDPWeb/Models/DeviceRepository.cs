@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using VirtualDeviceUDPAPI;
 using VirtualDeviceUDPWeb;
 
 namespace VirtualDeviceUDPWeb.Models
@@ -16,12 +17,12 @@ namespace VirtualDeviceUDPWeb.Models
 
         public DeviceRepository()
         {
-            _devices = new Dictionary<int, DeviceModel>();
+
         }
 
         public void UpdateRepository()
         {
-            _devices = new Dictionary<int, DeviceModel>()
+
         }
     }
 }
