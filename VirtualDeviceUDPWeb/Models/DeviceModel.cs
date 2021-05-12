@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using VirtualDeviceUDPAPI;
 
 namespace VirtualDeviceUDPWeb.Models
 {
@@ -15,6 +16,17 @@ namespace VirtualDeviceUDPWeb.Models
         public bool IsWithinLimits => (Value2 <= UpLimit && Value2 >= LowLimit);
 
         public DeviceModel() { }
+
+        public static DeviceModel GetDeviceModel(Device device)
+        {
+            return new DeviceModel()
+            {
+                Value1 = device.Value1,
+                Value2 = device.Value2,
+                UpLimit = device.UThreshold,
+                LowLimit = device.BThreshold
+            };
+        }
 
         public override string ToString()
         {

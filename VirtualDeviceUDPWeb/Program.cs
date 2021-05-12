@@ -1,20 +1,23 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+using VirtualDeviceUDPAPI;
 
 namespace VirtualDeviceUDPWeb
 {
     public class Program
     {
+        private static UdpNetworkManager _udpManager;
+        public static UdpNetworkManager UdpNetworkManager => _udpManager;
+
         public static void Main(string[] args)
         {
+            InitUdpmanager();
             CreateWebHostBuilder(args).Build().Run();
+        }
+
+        private static void InitUdpmanager()
+        {
+            _udpManager = new UdpNetworkManager();
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>

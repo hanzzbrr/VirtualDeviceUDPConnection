@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using VirtualDeviceUDPWeb;
 
 namespace VirtualDeviceUDPWeb.Models
 {
@@ -12,25 +10,18 @@ namespace VirtualDeviceUDPWeb.Models
 
         public static DeviceRepository SharedRepository => _sharedRepository;
 
+        
+
         public Dictionary<int, DeviceModel> Devices => _devices;
 
         public DeviceRepository()
         {
-            _devices.Add(1, new DeviceModel()
-            {
-                Value1 = 25,
-                Value2 = 15,
-                UpLimit = 225,
-                LowLimit = 25
-            });
+            _devices = new Dictionary<int, DeviceModel>();
+        }
 
-            _devices.Add(2, new DeviceModel()
-            {
-                Value1 = 55,
-                Value2 = 4,
-                UpLimit = 222,
-                LowLimit = 12
-            });
+        public void UpdateRepository()
+        {
+            _devices = new Dictionary<int, DeviceModel>()
         }
     }
 }
