@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 
-namespace VirtualDeviceUDP.Packages_
+namespace VirtualDeviceUDPAPI.Packages_
 {
     public class WriteRequest
     {

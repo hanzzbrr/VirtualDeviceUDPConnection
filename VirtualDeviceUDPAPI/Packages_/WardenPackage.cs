@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace VirtualDeviceUDP.Packages_
+namespace VirtualDeviceUDPAPI.Packages_
 {
     public class WardenPackage
     {

@@ -1,4 +1,4 @@
-﻿namespace VirtualDeviceUDP
+﻿namespace VirtualDeviceUDPAPI
 {
     public class Device
     {
