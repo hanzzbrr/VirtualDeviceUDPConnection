@@ -45,6 +45,7 @@ namespace VirtualDeviceUDP
                 {
                     continue;
                 }
+                Console.WriteLine("To change device limits press 'w'");
                 foreach (var d in _udpManager.Devices)
                 {
                     Console.Write($"id: {d.Key}, Value1: {d.Value.Value1}, ");
