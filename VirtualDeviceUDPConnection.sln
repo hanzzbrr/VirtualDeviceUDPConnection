@@ -5,9 +5,11 @@ VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtualDeviceUDP", "test2020\VirtualDeviceUDP.csproj", "{BD0A8E19-7112-456E-8559-2827C1887995}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtualDeviceUDPWeb", "VirtualDeviceUDPWeb\VirtualDeviceUDPWeb.csproj", "{F23FF04C-321A-43EB-BCA3-413EA3626C70}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtualDeviceUDPWeb", "VirtualDeviceUDPWeb\VirtualDeviceUDPWeb.csproj", "{F23FF04C-321A-43EB-BCA3-413EA3626C70}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtualDeviceUDPAPI", "VirtualDeviceUDPAPI\VirtualDeviceUDPAPI.csproj", "{08B3D628-0D9B-4B9C-BF83-44922853861C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtualDeviceUDPAPI", "VirtualDeviceUDPAPI\VirtualDeviceUDPAPI.csproj", "{08B3D628-0D9B-4B9C-BF83-44922853861C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoApi", "TodoApi\TodoApi.csproj", "{1CA14DB8-CE1A-4ECB-B35E-911C9BCC2F93}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{08B3D628-0D9B-4B9C-BF83-44922853861C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08B3D628-0D9B-4B9C-BF83-44922853861C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08B3D628-0D9B-4B9C-BF83-44922853861C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CA14DB8-CE1A-4ECB-B35E-911C9BCC2F93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CA14DB8-CE1A-4ECB-B35E-911C9BCC2F93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CA14DB8-CE1A-4ECB-B35E-911C9BCC2F93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CA14DB8-CE1A-4ECB-B35E-911C9BCC2F93}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
