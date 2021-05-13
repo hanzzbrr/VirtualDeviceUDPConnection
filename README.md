@@ -1,5 +1,7 @@
 [Basic api](VirtualDeviceUDPAPI)
+
 [asp net core realization](VirtualDeviceUDPWeb)
+
 [console realization](test2020)
 
 # VirtualDeviceUDPConnection
