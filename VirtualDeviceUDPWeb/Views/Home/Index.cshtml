@@ -1,6 +1,9 @@
 ﻿@model Dictionary<int, VirtualDeviceUDPWeb.Models.DeviceModel>
 
-@{ Layout = null; }
+@{ 
+    Layout = null;
+
+}
 
 <!DOCTYPE html>
 <html>
@@ -22,11 +25,23 @@
             </tr>
         </thead>
         <tbody>
+            @{ 
+                string style = "";
+            }
             @foreach (var d in Model)
             {
             <tr>
                 <td>@d.Key</td>
-                <td>@d.Value.Value1</td>
+                @if(d.Value.IsWithinLimits)
+                {
+                    style = "color:black";
+                }
+                else
+                {
+                    style = "color:red;";
+                }
+                <td style=@style>@d.Value.Value1</td>
+               
                 <td>@d.Value.Value2</td>
                 <td>@d.Value.UpLimit</td>
                 <td>@d.Value.LowLimit</td>
