@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# twitter-bootstrap client-side files
+VirtualDeviceUDPWeb/wwwroot/lib/twitter-bootstrap
